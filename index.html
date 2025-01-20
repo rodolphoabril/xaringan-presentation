@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Impacto do horário de publicação de uma matéria na sua audiência</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Rodolpho J. D. Quintela" />
+    <meta name="date" content="2025-01-20" />
+    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Impacto do horário de publicação de uma matéria na sua audiência
+]
+.subtitle[
+## Uma análise quatitativa
+]
+.author[
+### Rodolpho J. D. Quintela
+]
+.date[
+### 2025-01-20
+]
+
+---
+
+
+# Introdução
+
+**Objetivo:**  
+Analisar o comportamento da audiência ao longo do dia.
+
+**Metodologia:**  
+- Dividir o dia em períodos (Madrugada, Manhã, Tarde e Noite) e avaliar o impacto do período de publicação nos níveis de audiência, visando identificar diferenças entre os períodos considerados.  
+- Realizar análises descritivas das variáveis relevantes para o estudo.  
+- Ajustar um modelo logístico para determinar o impacto do período de publicação nos níveis de audiência.
+
+
+---
+
+
+
+# Análise descritiva dos dados
+
+## Porcentagens das publicações por período 
+
+
+![](index_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+---
+
+
+# Análise descritiva dos dados
+
+## Porcentagens da audiência por período 
+
+
+![](index_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+---
+
+
+# Análise descritiva dos dados
+
+## Porcentagens da audiência por período de publicação 
+
+
+![](index_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+---
+
+# Análise descritiva dos dados
+
+## Total de pageviews diários por período de publicação
+
+
+![](index_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+---
+
+# Modelo Logístico
+
+## Objetivo do Modelo
+
+- Avaliar o impacto do **período de publicação** na probabilidade de alta audiência.
+
+---
+
+## Resumo dos Coeficientes
+
+### Intercepto 
+- **Estimativa**: \(-1.5805\)  
+- **Interpretação**:  
+  - O logaritmo das chances \(log(odds)\) de alta audiência no período **Noite** é \(-1.5805\).  
+  - Corresponde a odds de aproximadamente **0.206**, o que implica que a probabilidade de alta audiência nesse período é de cerca de **17%**.  
+
+---
+
+## Efeito do Período de Publicação
+
+### Período **Manhã** 
+- **Estimativa**: \(0.4926\)  
+- **Razão de Chances (Odds Ratio)**: \(e^{0.4926} aproximadamente 1.636\)  
+- **Interpretação**:  
+  - Publicar no período **Manhã** aumenta as chances de alta audiência em **63.6%** em comparação ao período **Noite**.  
+  - Contudo, o efeito não é estatisticamente significativo (\(p &gt; 0.1\)).  
+
+---
+
+### Período **Tarde** 
+- **Estimativa**: \(0.7754\)  
+- **Razão de Chances (Odds Ratio)**: \(e^{0.7754} aproximadamente 2.171\)  
+- **Interpretação**:  
+  - Publicar no período **Tarde** aumenta as chances de alta audiência em **117%** em relação ao período **Noite**.  
+  - Este efeito é estatisticamente significativo (\(p = 0.0121\)).  
+
+---
+
+### Período **Madrugada**   
+- **Estimativa**: \(-16.9856\)  
+- **Interpretação**:  
+  - O coeficiente não é confiável, indicando um possível problema no modelo (provavelmente por baixa quantidade de dados ou desequilíbrio de eventos).  
+
+---
+
+## Combinando o periodo da Noite com a Madrugada
+
+
+![](index_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+---
+
+
+
+## Resumo dos Coeficientes
+
+### Intercepto  
+- **Estimativa**: \(-2.1484\)  
+- **Interpretação**:  
+  - O logaritmo das chances \(log(odds)\) de alta audiência no período **Madrugada + Noite** é \(-2.1484\). 
+  - Corresponde a odds de aproximadamente **0.116**, o que implica que a probabilidade de alta audiência nesse período é de cerca de **10.4%**.  
+
+---
+
+## Efeito do Período de Publicação
+
+### Período **Manhã**   
+- **Estimativa**: \(1.0606\)  
+- **Razão de Chances (Odds Ratio)**: \(e^{1.0606} aproximadamente 2.886\)  
+- **Interpretação**:  
+  - Publicar no período **Manhã** aumenta as chances de alta audiência em **188.7%** em comparação ao período **Madrugada + Noite**.  
+  - Este efeito é estatisticamente significativo (\(p = 0.000631\)).  
+
+---
+
+### Período **Tarde**  
+- **Estimativa**: \(1.3434\)  
+- **Razão de Chances (Odds Ratio)**: \(e^{1.3434} aproximadamente 3.832\)  
+- **Interpretação**:  
+  - Publicar no período **Tarde** aumenta as chances de alta audiência em **283.2%** em relação ao período **Madrugada + Noite**.  
+  - Este efeito é estatisticamente significativo (\(p = 0.0000087\)).
+
+---
+
+## Interpretação Geral
+
+- O modelo indica que os períodos **Manhã** e **Tarde** têm um impacto significativo (\(p &lt; 0.001\)) no aumento das chances de alta audiência em comparação ao período **Madrugada + Noite**.  
+- O período **Tarde** apresenta o maior efeito, aumentando as chances em quase quatro vezes.  
+
+
+---
+
+## Conclusões
+
+- Publicar durante a **Manhã** e a **Tarde** tem um impacto substancial nas chances de alcançar alta audiência, em comparação com a **Noite** e **Madrugada + Noite**.
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

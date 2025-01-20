@@ -1,0 +1,311 @@
+---
+title: "Impacto do horário de publicação de uma matéria na sua audiência"
+subtitle: "Uma análise quatitativa"
+author: "Rodolpho J. D. Quintela"
+date: "`r Sys.Date()`"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+# Introdução
+
+**Objetivo:**  
+Analisar o comportamento da audiência ao longo do dia.
+
+**Metodologia:**  
+- Dividir o dia em períodos (Madrugada, Manhã, Tarde e Noite) e avaliar o impacto do período de publicação nos níveis de audiência, visando identificar diferenças entre os períodos considerados.  
+- Realizar análises descritivas das variáveis relevantes para o estudo.  
+- Ajustar um modelo logístico para determinar o impacto do período de publicação nos níveis de audiência.
+
+
+---
+
+
+
+# Análise descritiva dos dados
+
+## Porcentagens das publicações por período 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, fig.width=9, fig.height=6}
+# Calculando as porcentagens
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+library(tidylog)
+library(hms)
+#Carregando dados das consultasbq
+
+load("dados_audiencia.RData")
+
+
+# ANÁLISE DESCRITIVA
+# Calculando as porcentagens
+percentuais_publicacao <- dados_audiencia %>%
+  filter(!is.na(periodo_publicacao)) %>%
+  count(periodo_publicacao) %>%
+  mutate(porcentagem = n / sum(n) * 100,
+         posicao_label = ifelse(porcentagem < 10, porcentagem + 2, porcentagem + 2))
+
+
+# Criando o gráfico com ggplot2
+ggplot(percentuais_publicacao, aes(x = periodo_publicacao, y = porcentagem)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  geom_text(
+    aes(y = posicao_label, label = paste0(round(porcentagem, 1), "%")), # Usa a posição calculada
+    size = 5
+  ) +
+  scale_y_continuous(
+    limits = c(0, max(percentuais_publicacao$porcentagem) + 10), # Aumenta o limite superior
+    expand = c(0, 0) # Remove espaçamento extra padrão
+  )+
+  labs(
+    title = "Distribuição de publicações por período",
+    x = "Período da publicação",
+    y = "Porcentagem (%)"
+  ) +
+  theme_minimal()
+
+```
+---
+
+
+# Análise descritiva dos dados
+
+## Porcentagens da audiência por período 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, fig.width=9, fig.height=6}
+# Definindo a ordem dos níveis
+dados_audiencia$periodo_audiencia <- factor(
+  dados_audiencia$periodo_audiencia,
+  levels = c("Madrugada", "Manhã", "Tarde", "Noite")
+)
+
+# Calculando as porcentagens
+dados_percentuais <- dados_audiencia %>%
+  filter(!is.na(periodo_audiencia)) %>%
+  count(periodo_audiencia) %>%
+  mutate(porcentagem = n / sum(n) * 100)
+
+# Criando o gráfico com ggplot2
+ggplot(dados_percentuais, aes(x = periodo_audiencia, y = porcentagem)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  geom_text(aes(label = paste0(round(porcentagem, 1), "%")), vjust = -0.5, size = 5) +
+  labs(
+    title = "Distribuição de Audiência por período",
+    x = "Período de Audiência",
+    y = "Porcentagem (%)"
+  ) +
+  theme_minimal()
+
+
+
+```
+---
+
+
+# Análise descritiva dos dados
+
+## Porcentagens da audiência por período de publicação 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, fig.width=9, fig.height=6}
+# Criando a tabela de contingência
+tabela_contingencia <- table(dados_audiencia$periodo_audiencia, dados_audiencia$periodo_publicacao)
+
+
+# Calculando as porcentagens
+tabela_percentual <- prop.table(tabela_contingencia) * 100
+
+
+
+# Transformando a tabela de contingência em um data frame
+percentuais <- as.data.frame(tabela_percentual)
+
+# Ajustando o data frame para facilitar a criação do gráfico
+percentuais <- percentuais %>%
+  mutate(Var1 = as.factor(Var1), # Periodo de audiência como fator
+         Var2 = as.factor(Var2)) %>%
+  rename(Periodo_Audiencia = Var1, Periodo_Publicacao = Var2, Porcentagem = Freq)
+
+# Criando o gráfico com ggplot
+ggplot(percentuais, aes(x = Periodo_Audiencia, y = Porcentagem, fill = Periodo_Publicacao)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_text(aes(label = paste0(round(Porcentagem, 1), "%")), 
+            position = position_dodge(width = 0.9), vjust = -0.3) +
+  labs(
+    title = "Porcentagem de Audiência por Período de Publicação",
+    x = "Período de Audiência",
+    y = "Porcentagem (%)",
+    fill = "Período de Publicação"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+---
+
+# Análise descritiva dos dados
+
+## Total de pageviews diários por período de publicação
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, fig.width=9, fig.height=6}
+# Agrupar os dados por data e somar o número de pageviews por dia
+df_pageviews_daily <- dados_audiencia %>%
+  group_by(data_date, periodo_publicacao) %>%
+  summarise(total_pageviews = sum(pageviews)) 
+
+
+# Criar o gráfico com suavização LOESS para cada período de publicação
+options(scipen = 9999)
+ggplot(data = df_pageviews_daily, aes(x = data_date, y = total_pageviews, color = periodo_publicacao)) + 
+  geom_smooth(aes(group = periodo_publicacao), method = "loess", se = FALSE, size = 1) +  # Suavização LOESS
+  labs(title = "Pageviews diários por período de publicação",
+       x = "Data",
+       y = "Total de Pageviews",
+       color = "Período de publicação") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") 
+
+```
+---
+
+# Modelo Logístico
+
+## Objetivo do Modelo
+
+- Avaliar o impacto do **período de publicação** na probabilidade de alta audiência.
+
+---
+
+## Resumo dos Coeficientes
+
+### Intercepto 
+- **Estimativa**: \(-1.5805\)  
+- **Interpretação**:  
+  - O logaritmo das chances \(log(odds)\) de alta audiência no período **Noite** é \(-1.5805\).  
+  - Corresponde a odds de aproximadamente **0.206**, o que implica que a probabilidade de alta audiência nesse período é de cerca de **17%**.  
+
+---
+
+## Efeito do Período de Publicação
+
+### Período **Manhã** 
+- **Estimativa**: \(0.4926\)  
+- **Razão de Chances (Odds Ratio)**: \(e^{0.4926} aproximadamente 1.636\)  
+- **Interpretação**:  
+  - Publicar no período **Manhã** aumenta as chances de alta audiência em **63.6%** em comparação ao período **Noite**.  
+  - Contudo, o efeito não é estatisticamente significativo (\(p > 0.1\)).  
+
+---
+
+### Período **Tarde** 
+- **Estimativa**: \(0.7754\)  
+- **Razão de Chances (Odds Ratio)**: \(e^{0.7754} aproximadamente 2.171\)  
+- **Interpretação**:  
+  - Publicar no período **Tarde** aumenta as chances de alta audiência em **117%** em relação ao período **Noite**.  
+  - Este efeito é estatisticamente significativo (\(p = 0.0121\)).  
+
+---
+
+### Período **Madrugada**   
+- **Estimativa**: \(-16.9856\)  
+- **Interpretação**:  
+  - O coeficiente não é confiável, indicando um possível problema no modelo (provavelmente por baixa quantidade de dados ou desequilíbrio de eventos).  
+
+---
+
+## Combinando o periodo da Noite com a Madrugada
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, fig.width=9, fig.height=6}
+# Combinado os dados do período da madrugada com a noite
+
+df_pageviews_daily$periodo_publicacao <- ifelse(
+  df_pageviews_daily$periodo_publicacao == "Madrugada", 
+  "Noite", 
+  as.character(df_pageviews_daily$periodo_publicacao)
+)
+
+
+library(dplyr)
+
+df_pageviews_daily <- df_pageviews_daily %>%
+  mutate(periodo_publicacao = recode(periodo_publicacao, "Noite" = "Madrugada + Noite"))
+
+
+
+# Criar o gráfico com suavização LOESS para cada período de publicação
+options(scipen = 9999)
+ggplot(data = df_pageviews_daily, aes(x = data_date, y = total_pageviews, color = periodo_publicacao)) + 
+  geom_smooth(aes(group = periodo_publicacao), method = "loess", se = FALSE, size = 1) +  # Suavização LOESS
+  labs(title = "Pageviews diários por período de publicação",
+       x = "Data",
+       y = "Total de Pageviews",
+       color = "Período de publicação") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") 
+
+
+
+```
+---
+
+
+
+## Resumo dos Coeficientes
+
+### Intercepto  
+- **Estimativa**: \(-2.1484\)  
+- **Interpretação**:  
+  - O logaritmo das chances \(log(odds)\) de alta audiência no período **Madrugada + Noite** é \(-2.1484\). 
+  - Corresponde a odds de aproximadamente **0.116**, o que implica que a probabilidade de alta audiência nesse período é de cerca de **10.4%**.  
+
+---
+
+## Efeito do Período de Publicação
+
+### Período **Manhã**   
+- **Estimativa**: \(1.0606\)  
+- **Razão de Chances (Odds Ratio)**: \(e^{1.0606} aproximadamente 2.886\)  
+- **Interpretação**:  
+  - Publicar no período **Manhã** aumenta as chances de alta audiência em **188.7%** em comparação ao período **Madrugada + Noite**.  
+  - Este efeito é estatisticamente significativo (\(p = 0.000631\)).  
+
+---
+
+### Período **Tarde**  
+- **Estimativa**: \(1.3434\)  
+- **Razão de Chances (Odds Ratio)**: \(e^{1.3434} aproximadamente 3.832\)  
+- **Interpretação**:  
+  - Publicar no período **Tarde** aumenta as chances de alta audiência em **283.2%** em relação ao período **Madrugada + Noite**.  
+  - Este efeito é estatisticamente significativo (\(p = 0.0000087\)).
+
+---
+
+## Interpretação Geral
+
+- O modelo indica que os períodos **Manhã** e **Tarde** têm um impacto significativo (\(p < 0.001\)) no aumento das chances de alta audiência em comparação ao período **Madrugada + Noite**.  
+- O período **Tarde** apresenta o maior efeito, aumentando as chances em quase quatro vezes.  
+
+
+---
+
+## Conclusões
+
+- Publicar durante a **Manhã** e a **Tarde** tem um impacto substancial nas chances de alcançar alta audiência, em comparação com a **Noite** e **Madrugada + Noite**.
+
+
+
+
+
